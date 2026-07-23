@@ -1,13 +1,7 @@
 """Core of simple_viz — theme, palette, and chart functions.
 
-Everything the library does lives here:
-
-* A validated, colorblind-aware categorical palette (:data:`PALETTE`) that is
-  applied to matplotlib automatically via :func:`use_theme`.
-* Chart functions (:func:`bar`, :func:`barh`, :func:`line`, :func:`scatter`,
-  :func:`hist`, :func:`pie`) that share one contract — data first, optional
-  ``title`` / ``xlabel`` / ``ylabel`` / ``ax`` / ``save`` keywords, and each
-  returns the :class:`~matplotlib.axes.Axes` it drew on.
+Every chart shares one contract: data first, optional ``title`` / ``xlabel`` /
+``ylabel`` / ``ax`` / ``save`` keywords, and each returns the Axes it drew on.
 """
 
 from __future__ import annotations
@@ -18,116 +12,50 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-# ---------------------------------------------------------------------------
-# Palette & theme
-# ---------------------------------------------------------------------------
-
-#: Fixed categorical color order. Do not reorder casually — the sequence is
-#: chosen so that adjacent slots stay distinguishable under common forms of
-#: color vision deficiency. Colors are assigned in order, never cycled
-#: arbitrarily: the Nth series always gets slot N.
+#: Fixed categorical color order, chosen so adjacent slots stay distinguishable
+#: under common forms of color vision deficiency. Assigned in order, never
+#: cycled arbitrarily: the Nth series always gets slot N.
 PALETTE = [
-    "#2a78d6",  # 1 blue
-    "#eb6834",  # 2 orange
-    "#1baf7a",  # 3 aqua
-    "#eda100",  # 4 yellow
-    "#e87ba4",  # 5 magenta
-    "#008300",  # 6 green
-    "#4a3aa7",  # 7 violet
-    "#e34948",  # 8 red
+    "#2a78d6",  # blue
+    "#eb6834",  # orange
+    "#1baf7a",  # aqua
+    "#eda100",  # yellow
+    "#e87ba4",  # magenta
+    "#008300",  # green
+    "#4a3aa7",  # violet
+    "#e34948",  # red
 ]
 
 # Chrome / ink colors (light surface).
-_INK_PRIMARY = "#0b0b0b"
-_INK_SECONDARY = "#52514e"
-_MUTED = "#898781"
-_GRID = "#e1e0d9"
-_SURFACE = "#fcfcfb"
+_INK, _INK2, _MUTED, _GRID, _SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#fcfcfb"
 
 
 def color(i: int) -> str:
-    """Return the categorical color for slot ``i`` (0-based).
-
-    Slots wrap around the palette if ``i`` exceeds its length, but relying on
-    more than eight distinct series is discouraged — group the tail instead.
-    """
+    """Categorical color for slot ``i`` (0-based); wraps past the palette end."""
     return PALETTE[i % len(PALETTE)]
 
 
 def use_theme() -> None:
-    """Apply the simple_viz look to matplotlib's global rcParams.
-
-    Called automatically when :mod:`simple_viz` is imported. Call it again to
-    restore the theme after another library has changed the rcParams.
-    """
-    mpl.rcParams.update(
-        {
-            # Color cycle drives the default series colors.
-            "axes.prop_cycle": mpl.cycler(color=PALETTE),
-            # Surface.
-            "figure.facecolor": _SURFACE,
-            "axes.facecolor": _SURFACE,
-            "savefig.facecolor": _SURFACE,
-            # Recessive chrome: drop the top/right spines, soften the rest.
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "axes.edgecolor": _MUTED,
-            "axes.linewidth": 0.8,
-            # Light, behind-the-data gridlines.
-            "axes.grid": True,
-            "axes.axisbelow": True,
-            "grid.color": _GRID,
-            "grid.linewidth": 0.8,
-            # Typography.
-            "font.family": "sans-serif",
-            "font.size": 11,
-            "axes.titlesize": 14,
-            "axes.titleweight": "bold",
-            "axes.titlecolor": _INK_PRIMARY,
-            "axes.titlelocation": "left",
-            "axes.titlepad": 12,
-            "axes.labelcolor": _INK_SECONDARY,
-            "axes.labelsize": 11,
-            "text.color": _INK_PRIMARY,
-            "xtick.color": _MUTED,
-            "ytick.color": _MUTED,
-            "xtick.labelsize": 10,
-            "ytick.labelsize": 10,
-            # Marks.
-            "lines.linewidth": 2.0,
-            "lines.markersize": 6,
-            # Legend.
-            "legend.frameon": False,
-            "legend.fontsize": 10,
-            # Output.
-            "figure.figsize": (8, 5),
-            "figure.dpi": 110,
-            "savefig.dpi": 150,
-            "savefig.bbox": "tight",
-        }
-    )
+    """Apply the simple_viz look to matplotlib's rcParams (done on import)."""
+    mpl.rcParams.update({
+        "axes.prop_cycle": mpl.cycler(color=PALETTE),
+        "figure.facecolor": _SURFACE, "axes.facecolor": _SURFACE, "savefig.facecolor": _SURFACE,
+        "axes.spines.top": False, "axes.spines.right": False,
+        "axes.edgecolor": _MUTED, "axes.linewidth": 0.8,
+        "axes.grid": True, "axes.axisbelow": True, "grid.color": _GRID, "grid.linewidth": 0.8,
+        "font.family": "sans-serif", "font.size": 11,
+        "axes.titlesize": 14, "axes.titleweight": "bold", "axes.titlecolor": _INK,
+        "axes.titlelocation": "left", "axes.titlepad": 12,
+        "axes.labelcolor": _INK2, "axes.labelsize": 11, "text.color": _INK,
+        "xtick.color": _MUTED, "ytick.color": _MUTED, "xtick.labelsize": 10, "ytick.labelsize": 10,
+        "lines.linewidth": 2.0, "lines.markersize": 6,
+        "legend.frameon": False, "legend.fontsize": 10,
+        "figure.figsize": (8, 5), "figure.dpi": 110, "savefig.dpi": 150, "savefig.bbox": "tight",
+    })
 
 
-# ---------------------------------------------------------------------------
-# Chart helpers
-# ---------------------------------------------------------------------------
-
-
-def _prepare(ax: Optional[Axes]) -> Axes:
-    """Return the Axes to draw on, creating a figure if none was given."""
-    if ax is None:
-        _, ax = plt.subplots()
-    return ax
-
-
-def _finish(
-    ax: Axes,
-    title: Optional[str],
-    xlabel: Optional[str],
-    ylabel: Optional[str],
-    save: Optional[str],
-) -> Axes:
-    """Apply shared labels and optionally save, then return the Axes."""
+def _finish(ax, title, xlabel, ylabel, save) -> Axes:
+    """Apply shared labels, optionally save, and return the Axes."""
     if title:
         ax.set_title(title)
     if xlabel:
@@ -139,25 +67,15 @@ def _finish(
     return ax
 
 
-# ---------------------------------------------------------------------------
-# Chart functions
-# ---------------------------------------------------------------------------
+def _axes(ax) -> Axes:
+    return ax if ax is not None else plt.subplots()[1]
 
 
-def bar(
-    labels: Sequence,
-    values: Sequence[float],
-    *,
-    title: Optional[str] = None,
-    xlabel: Optional[str] = None,
-    ylabel: Optional[str] = None,
-    ax: Optional[Axes] = None,
-    save: Optional[str] = None,
-) -> Axes:
+def bar(labels, values, *, title=None, xlabel=None, ylabel=None, ax=None, save=None) -> Axes:
     """Vertical bar chart of ``values`` labeled by ``labels``."""
     if len(labels) != len(values):
         raise ValueError("labels and values must be the same length")
-    ax = _prepare(ax)
+    ax = _axes(ax)
     ax.bar(range(len(values)), values, color=color(0), width=0.68, zorder=3)
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels([str(x) for x in labels])
@@ -165,20 +83,11 @@ def bar(
     return _finish(ax, title, xlabel, ylabel, save)
 
 
-def barh(
-    labels: Sequence,
-    values: Sequence[float],
-    *,
-    title: Optional[str] = None,
-    xlabel: Optional[str] = None,
-    ylabel: Optional[str] = None,
-    ax: Optional[Axes] = None,
-    save: Optional[str] = None,
-) -> Axes:
+def barh(labels, values, *, title=None, xlabel=None, ylabel=None, ax=None, save=None) -> Axes:
     """Horizontal bar chart — good for long or many category labels."""
     if len(labels) != len(values):
         raise ValueError("labels and values must be the same length")
-    ax = _prepare(ax)
+    ax = _axes(ax)
     ax.barh(range(len(values)), values, color=color(0), height=0.68, zorder=3)
     ax.set_yticks(range(len(labels)))
     ax.set_yticklabels([str(x) for x in labels])
@@ -187,98 +96,48 @@ def barh(
     return _finish(ax, title, xlabel, ylabel, save)
 
 
-def line(
-    x: Sequence,
-    y,
-    *,
-    labels: Optional[Sequence[str]] = None,
-    title: Optional[str] = None,
-    xlabel: Optional[str] = None,
-    ylabel: Optional[str] = None,
-    ax: Optional[Axes] = None,
-    save: Optional[str] = None,
-) -> Axes:
-    """Line chart.
-
-    ``y`` may be a single sequence, or a sequence of sequences for multiple
-    series. When there are multiple series, pass ``labels`` to name them and a
-    legend is drawn automatically.
-    """
-    ax = _prepare(ax)
-
-    # Normalize to a list of series.
+def line(x, y, *, labels=None, title=None, xlabel=None, ylabel=None, ax=None, save=None) -> Axes:
+    """Line chart. ``y`` is one sequence, or a list of sequences for multiple
+    series; pass ``labels`` to name them and a legend is drawn automatically."""
+    ax = _axes(ax)
     first = y[0] if len(y) else None
-    is_multi = isinstance(first, (list, tuple)) or hasattr(first, "__len__")
-    series = list(y) if is_multi else [y]
-
+    series = list(y) if hasattr(first, "__len__") else [y]
     for i, ys in enumerate(series):
         if len(ys) != len(x):
             raise ValueError("each y series must be the same length as x")
-        label = labels[i] if labels and i < len(labels) else None
-        ax.plot(x, ys, color=color(i), label=label, marker="o", markersize=4)
-
+        ax.plot(x, ys, color=color(i), marker="o", markersize=4,
+                label=labels[i] if labels and i < len(labels) else None)
     if labels and len(series) > 1:
         ax.legend()
     return _finish(ax, title, xlabel, ylabel, save)
 
 
-def scatter(
-    x: Sequence[float],
-    y: Sequence[float],
-    *,
-    title: Optional[str] = None,
-    xlabel: Optional[str] = None,
-    ylabel: Optional[str] = None,
-    ax: Optional[Axes] = None,
-    save: Optional[str] = None,
-) -> Axes:
+def scatter(x, y, *, title=None, xlabel=None, ylabel=None, ax=None, save=None) -> Axes:
     """Scatter plot of paired ``x`` / ``y`` values."""
     if len(x) != len(y):
         raise ValueError("x and y must be the same length")
-    ax = _prepare(ax)
+    ax = _axes(ax)
     ax.scatter(x, y, color=color(0), s=48, alpha=0.85, edgecolor=None, zorder=3)
     return _finish(ax, title, xlabel, ylabel, save)
 
 
-def hist(
-    values: Sequence[float],
-    *,
-    bins: int = 10,
-    title: Optional[str] = None,
-    xlabel: Optional[str] = None,
-    ylabel: Optional[str] = "Count",
-    ax: Optional[Axes] = None,
-    save: Optional[str] = None,
-) -> Axes:
+def hist(values, *, bins=10, title=None, xlabel=None, ylabel="Count", ax=None, save=None) -> Axes:
     """Histogram of ``values`` into ``bins`` bins."""
-    ax = _prepare(ax)
+    ax = _axes(ax)
     ax.hist(values, bins=bins, color=color(0), zorder=3)
     ax.grid(axis="x", visible=False)
     return _finish(ax, title, xlabel, ylabel, save)
 
 
-def pie(
-    labels: Sequence[str],
-    values: Sequence[float],
-    *,
-    title: Optional[str] = None,
-    ax: Optional[Axes] = None,
-    save: Optional[str] = None,
-) -> Axes:
-    """Pie chart. Best kept to a handful of slices; prefer :func:`bar` when
-    comparing precise magnitudes."""
+def pie(labels, values, *, title=None, ax=None, save=None) -> Axes:
+    """Pie chart. Best kept to a few slices; prefer :func:`bar` for precise
+    magnitude comparison."""
     if len(labels) != len(values):
         raise ValueError("labels and values must be the same length")
-    ax = _prepare(ax)
-    colors = [color(i) for i in range(len(values))]
-    ax.pie(
-        values,
-        labels=[str(x) for x in labels],
-        colors=colors,
-        autopct="%1.0f%%",
-        wedgeprops={"edgecolor": _SURFACE, "linewidth": 2},
-        textprops={"color": _INK_PRIMARY},
-    )
+    ax = _axes(ax)
+    ax.pie(values, labels=[str(x) for x in labels], colors=[color(i) for i in range(len(values))],
+           autopct="%1.0f%%", wedgeprops={"edgecolor": _SURFACE, "linewidth": 2},
+           textprops={"color": _INK})
     ax.set_aspect("equal")
     ax.grid(visible=False)
     return _finish(ax, title, None, None, save)
