@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pytest
 from matplotlib.axes import Axes
 
-import simpleviz as sv
+import simple_viz as sv
 
 
 def teardown_function() -> None:

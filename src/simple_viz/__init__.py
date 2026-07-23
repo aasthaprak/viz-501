@@ -1,4 +1,4 @@
-"""simpleviz — a small, opinionated visualization library built on matplotlib.
+"""simple_viz — a small, opinionated visualization library built on matplotlib.
 
 The goal is to make good-looking, readable charts with almost no boilerplate.
 Every chart function shares the same conventions:
@@ -11,14 +11,21 @@ Every chart function shares the same conventions:
 
 Example
 -------
->>> import simpleviz as sv
+>>> import simple_viz as sv
 >>> sv.bar(["A", "B", "C"], [3, 7, 5], title="Scores", save="scores.png")
-
-See ``examples/demo.py`` for a gallery of every chart type.
 """
 
-from .theme import PALETTE, use_theme, color
-from .charts import bar, barh, line, scatter, hist, pie
+from .core import (
+    PALETTE,
+    use_theme,
+    color,
+    bar,
+    barh,
+    line,
+    scatter,
+    hist,
+    pie,
+)
 
 __version__ = "0.1.0"
 

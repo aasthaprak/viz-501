@@ -1,9 +1,9 @@
-# simpleviz
+# simple_viz
 
 A small, opinionated visualization library built on [matplotlib](https://matplotlib.org/).
 
 The idea: get a good-looking, readable chart in one line, without touching
-matplotlib's rcParams or fiddling with colors, spines, and gridlines. simpleviz
+matplotlib's rcParams or fiddling with colors, spines, and gridlines. simple_viz
 ships a validated, colorblind-aware palette and recessive chrome by default, and
 gets out of your way when you need to customize.
 
@@ -18,7 +18,7 @@ Requires Python 3.8+ and matplotlib 3.5+.
 ## Quick start
 
 ```python
-import simpleviz as sv
+import simple_viz as sv
 
 sv.bar(["A", "B", "C"], [3, 7, 5], title="Scores", save="scores.png")
 ```
@@ -72,7 +72,7 @@ sv.line(
 
 ```python
 import matplotlib.pyplot as plt
-import simpleviz as sv
+import simple_viz as sv
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
 sv.bar(["Q1", "Q2", "Q3", "Q4"], [12, 19, 15, 22], title="Quarterly", ax=axes[0])
@@ -81,17 +81,17 @@ sv.line(["Jan", "Feb", "Mar"], [3, 5, 4], title="Trend", ax=axes[1])
 
 ## The palette
 
-`simpleviz.PALETTE` is a fixed list of eight hues, ordered so that adjacent
+`simple_viz.PALETTE` is a fixed list of eight hues, ordered so that adjacent
 colors stay distinguishable under common forms of color vision deficiency.
 Colors are assigned in order (series 0 → slot 0, series 1 → slot 1, …) and never
-cycled arbitrarily. Use `simpleviz.color(i)` to pull slot `i` yourself.
+cycled arbitrarily. Use `simple_viz.color(i)` to pull slot `i` yourself.
 
 If you have more than eight series, group the smallest into an "Other" category
 rather than relying on hue to distinguish nine-plus lines.
 
 ## Theme
 
-The theme is applied on import via `simpleviz.use_theme()`. If another library
+The theme is applied on import via `simple_viz.use_theme()`. If another library
 overrides matplotlib's rcParams, call `use_theme()` again to restore it.
 
 ## Examples & tests

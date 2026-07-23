@@ -1,23 +1,116 @@
-"""Chart functions for simpleviz.
+"""Core of simple_viz — theme, palette, and chart functions.
 
-Each function follows the same contract:
+Everything the library does lives here:
 
-* The data comes first, positionally.
-* ``title``, ``xlabel``, ``ylabel`` are optional keyword labels.
-* ``ax`` lets you draw into an existing Axes (for subplots); if omitted a new
-  figure and Axes are created.
-* ``save`` writes the figure to the given path.
-* The function returns the Axes it drew on, so you can keep customizing.
+* A validated, colorblind-aware categorical palette (:data:`PALETTE`) that is
+  applied to matplotlib automatically via :func:`use_theme`.
+* Chart functions (:func:`bar`, :func:`barh`, :func:`line`, :func:`scatter`,
+  :func:`hist`, :func:`pie`) that share one contract — data first, optional
+  ``title`` / ``xlabel`` / ``ylabel`` / ``ax`` / ``save`` keywords, and each
+  returns the :class:`~matplotlib.axes.Axes` it drew on.
 """
 
 from __future__ import annotations
 
 from typing import Optional, Sequence
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from .theme import color
+# ---------------------------------------------------------------------------
+# Palette & theme
+# ---------------------------------------------------------------------------
+
+#: Fixed categorical color order. Do not reorder casually — the sequence is
+#: chosen so that adjacent slots stay distinguishable under common forms of
+#: color vision deficiency. Colors are assigned in order, never cycled
+#: arbitrarily: the Nth series always gets slot N.
+PALETTE = [
+    "#2a78d6",  # 1 blue
+    "#eb6834",  # 2 orange
+    "#1baf7a",  # 3 aqua
+    "#eda100",  # 4 yellow
+    "#e87ba4",  # 5 magenta
+    "#008300",  # 6 green
+    "#4a3aa7",  # 7 violet
+    "#e34948",  # 8 red
+]
+
+# Chrome / ink colors (light surface).
+_INK_PRIMARY = "#0b0b0b"
+_INK_SECONDARY = "#52514e"
+_MUTED = "#898781"
+_GRID = "#e1e0d9"
+_SURFACE = "#fcfcfb"
+
+
+def color(i: int) -> str:
+    """Return the categorical color for slot ``i`` (0-based).
+
+    Slots wrap around the palette if ``i`` exceeds its length, but relying on
+    more than eight distinct series is discouraged — group the tail instead.
+    """
+    return PALETTE[i % len(PALETTE)]
+
+
+def use_theme() -> None:
+    """Apply the simple_viz look to matplotlib's global rcParams.
+
+    Called automatically when :mod:`simple_viz` is imported. Call it again to
+    restore the theme after another library has changed the rcParams.
+    """
+    mpl.rcParams.update(
+        {
+            # Color cycle drives the default series colors.
+            "axes.prop_cycle": mpl.cycler(color=PALETTE),
+            # Surface.
+            "figure.facecolor": _SURFACE,
+            "axes.facecolor": _SURFACE,
+            "savefig.facecolor": _SURFACE,
+            # Recessive chrome: drop the top/right spines, soften the rest.
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+            "axes.edgecolor": _MUTED,
+            "axes.linewidth": 0.8,
+            # Light, behind-the-data gridlines.
+            "axes.grid": True,
+            "axes.axisbelow": True,
+            "grid.color": _GRID,
+            "grid.linewidth": 0.8,
+            # Typography.
+            "font.family": "sans-serif",
+            "font.size": 11,
+            "axes.titlesize": 14,
+            "axes.titleweight": "bold",
+            "axes.titlecolor": _INK_PRIMARY,
+            "axes.titlelocation": "left",
+            "axes.titlepad": 12,
+            "axes.labelcolor": _INK_SECONDARY,
+            "axes.labelsize": 11,
+            "text.color": _INK_PRIMARY,
+            "xtick.color": _MUTED,
+            "ytick.color": _MUTED,
+            "xtick.labelsize": 10,
+            "ytick.labelsize": 10,
+            # Marks.
+            "lines.linewidth": 2.0,
+            "lines.markersize": 6,
+            # Legend.
+            "legend.frameon": False,
+            "legend.fontsize": 10,
+            # Output.
+            "figure.figsize": (8, 5),
+            "figure.dpi": 110,
+            "savefig.dpi": 150,
+            "savefig.bbox": "tight",
+        }
+    )
+
+
+# ---------------------------------------------------------------------------
+# Chart helpers
+# ---------------------------------------------------------------------------
 
 
 def _prepare(ax: Optional[Axes]) -> Axes:
@@ -44,6 +137,11 @@ def _finish(
     if save:
         ax.figure.savefig(save)
     return ax
+
+
+# ---------------------------------------------------------------------------
+# Chart functions
+# ---------------------------------------------------------------------------
 
 
 def bar(
@@ -178,8 +276,8 @@ def pie(
         labels=[str(x) for x in labels],
         colors=colors,
         autopct="%1.0f%%",
-        wedgeprops={"edgecolor": "#fcfcfb", "linewidth": 2},
-        textprops={"color": "#0b0b0b"},
+        wedgeprops={"edgecolor": _SURFACE, "linewidth": 2},
+        textprops={"color": _INK_PRIMARY},
     )
     ax.set_aspect("equal")
     ax.grid(visible=False)

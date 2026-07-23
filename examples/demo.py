@@ -10,7 +10,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-import simpleviz as sv
+import simple_viz as sv
 
 OUT = os.path.join(os.path.dirname(__file__), "output")
 os.makedirs(OUT, exist_ok=True)
