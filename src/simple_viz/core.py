@@ -46,7 +46,11 @@ def use_theme() -> None:
         "axes.spines.top": False, "axes.spines.right": False,
         "axes.edgecolor": _MUTED, "axes.linewidth": 0.8,
         "axes.grid": True, "axes.axisbelow": True, "grid.color": _GRID, "grid.linewidth": 0.6,
-        "font.family": "sans-serif", "font.size": 11,
+        "font.family": "sans-serif",
+        # Prefer a clean Helvetica-like face; fall back gracefully if absent.
+        "font.sans-serif": ["Inter", "Helvetica Neue", "Helvetica", "Arial",
+                            "Liberation Sans", "DejaVu Sans"],
+        "font.size": 11,
         "axes.titlesize": 14, "axes.titleweight": "bold", "axes.titlecolor": _INK,
         "axes.titlelocation": "left", "axes.titlepad": 16,
         "axes.labelcolor": _INK2, "axes.labelsize": 11, "text.color": _INK,
