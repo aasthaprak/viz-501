@@ -6,11 +6,32 @@ Every chart shares one contract: data first, optional ``title`` / ``xlabel`` /
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Optional, Sequence
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib import font_manager as _fm
 from matplotlib.axes import Axes
+
+# Poppins is bundled with the package so charts look identical everywhere.
+_FONT_DIR = Path(__file__).parent / "fonts"
+_FONT = "Poppins"
+
+
+def _register_fonts() -> str:
+    """Register the bundled Poppins weights; return the family name to use.
+
+    Falls back to the default sans-serif family if the files are missing.
+    """
+    if not _FONT_DIR.is_dir():
+        return "sans-serif"
+    for ttf in _FONT_DIR.glob("*.ttf"):
+        try:
+            _fm.fontManager.addfont(str(ttf))
+        except Exception:  # pragma: no cover - never break import over a font
+            pass
+    return _FONT if any(f.name == _FONT for f in _fm.fontManager.ttflist) else "sans-serif"
 
 #: Deep jewel-tone categorical order — rich, saturated hues that stay elegant
 #: on a light surface. Ordered so adjacent slots remain distinguishable under
@@ -40,15 +61,16 @@ def color(i: int) -> str:
 
 def use_theme() -> None:
     """Apply the simple_viz look to matplotlib's rcParams (done on import)."""
+    family = _register_fonts()
     mpl.rcParams.update({
         "axes.prop_cycle": mpl.cycler(color=PALETTE),
         "figure.facecolor": _SURFACE, "axes.facecolor": _SURFACE, "savefig.facecolor": _SURFACE,
         "axes.spines.top": False, "axes.spines.right": False,
         "axes.edgecolor": _MUTED, "axes.linewidth": 0.8,
         "axes.grid": True, "axes.axisbelow": True, "grid.color": _GRID, "grid.linewidth": 0.6,
-        "font.family": "sans-serif",
-        # Prefer a clean Helvetica-like face; fall back gracefully if absent.
-        "font.sans-serif": ["Inter", "Helvetica Neue", "Helvetica", "Arial",
+        # Bundled Poppins (geometric sans) with graceful fallback.
+        "font.family": family,
+        "font.sans-serif": [_FONT, "Helvetica Neue", "Arial",
                             "Liberation Sans", "DejaVu Sans"],
         "font.size": 11,
         "axes.titlesize": 14, "axes.titleweight": "bold", "axes.titlecolor": _INK,

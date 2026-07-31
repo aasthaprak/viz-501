@@ -17,3 +17,6 @@ dev = ["pytest>=7.0"]
 [tool.setuptools]
 package-dir = { "" = "src" }
 packages = ["simple_viz"]
+
+[tool.setuptools.package-data]
+simple_viz = ["fonts/*.ttf"]
