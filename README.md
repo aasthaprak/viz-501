@@ -101,6 +101,23 @@ python examples/demo.py    # renders one PNG per chart type into examples/output
 python -m pytest           # run the test suite
 ```
 
+### Worked visualizations
+
+Two longer, story-driven figures show the theme applied to real datasets — each
+a distinct topic and chart form. Both write a PNG into `examples/output/`.
+
+```bash
+python examples/maternal_health.py   # women's health — line + bar: global
+                                     # maternal-mortality decline and the
+                                     # regional gap (WHO/UN, illustrative)
+python examples/womens_sports.py     # sports — dumbbell chart: women's-league
+                                     # match attendance, 2019 vs 2024
+```
+
+Both use only the bundled palette, Poppins, and chrome plus plain matplotlib
+annotations — a template for building your own elevated charts on top of
+`simple_viz`.
+
 ## License
 
 MIT
