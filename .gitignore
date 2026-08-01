@@ -4,5 +4,8 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
-examples/output/
+examples/output/*
+# Keep the two figures embedded in the README.
+!examples/output/maternal_health.png
+!examples/output/womens_sports.png
 .venv/

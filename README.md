@@ -1,122 +1,66 @@
 # simple_viz
 
 A small, opinionated visualization library built on [matplotlib](https://matplotlib.org/).
-
-The idea: get a good-looking, readable chart in one line, without touching
-matplotlib's rcParams or fiddling with colors, spines, and gridlines. simple_viz
-ships a validated, colorblind-aware palette and recessive chrome by default, and
-gets out of your way when you need to customize.
+Get a good-looking, colorblind-aware chart in one line — the palette, fonts, and
+chrome are styled for you on import.
 
 ## Install
 
 ```bash
-pip install -e .        # from a clone of this repo
+pip install simple-viz-aastha
 ```
 
-Requires Python 3.8+ and matplotlib 3.5+.
+Requires Python 3.8+ and matplotlib 3.5+. (Import the package as `simple_viz`.)
 
-## Quick start
+## Usage
+
+Every chart function takes your data first, plus optional `title` / `xlabel` /
+`ylabel` / `ax` / `save` keywords, and returns the matplotlib `Axes`. Columns of
+a pandas `DataFrame` work directly:
 
 ```python
+import pandas as pd
 import simple_viz as sv
 
-sv.bar(["A", "B", "C"], [3, 7, 5], title="Scores", save="scores.png")
+df = pd.DataFrame({
+    "month":   ["Jan", "Feb", "Mar", "Apr"],
+    "signups": [120, 145, 138, 172],
+})
+
+# Vertical bar chart
+sv.bar(df["month"], df["signups"], title="Signups by month", ylabel="Signups")
+
+# Line chart, saved to a file
+sv.line(df["month"], df["signups"], title="Signup trend", save="trend.png")
 ```
 
-That's it — the theme is applied automatically on import.
+The theme is applied automatically when you `import simple_viz`.
 
 ## Chart types
 
 | Function | What it draws |
 |----------|---------------|
 | `bar(labels, values)`      | Vertical bar chart |
-| `barh(labels, values)`     | Horizontal bar chart (good for long labels) |
+| `barh(labels, values)`     | Horizontal bar chart |
 | `line(x, y, labels=...)`   | Line chart, single or multiple series |
 | `scatter(x, y)`            | Scatter plot |
 | `hist(values, bins=...)`   | Histogram |
 | `pie(labels, values)`      | Pie chart |
 
-### Shared conventions
+## Example visualizations
 
-Every chart function accepts the same optional keywords:
+Two worked figures (in `examples/`) apply the theme to real datasets:
 
-- `title`, `xlabel`, `ylabel` — labels.
-- `ax` — draw into an existing matplotlib `Axes` (for subplots). If omitted, a
-  new figure is created.
-- `save` — a path to write the figure to (e.g. `"chart.png"`).
+![Global maternal mortality: a line chart of the worldwide decline from 2000–2020 beside a bar chart of the 2020 regional gap](examples/output/maternal_health.png)
 
-Each function **returns the `Axes`** it drew on, so you can keep customizing with
-plain matplotlib afterwards:
+*Women's health — the global maternal-mortality decline (2000–2020) alongside the stark regional gap, with Sub-Saharan Africa highlighted.*
 
-```python
-ax = sv.bar(["A", "B"], [1, 2])
-ax.set_ylim(0, 5)
-ax.figure.savefig("out.png")
-```
+![Dumbbell chart of women's-league average match attendance in 2019 versus 2024 across five leagues](examples/output/womens_sports.png)
 
-### Multiple line series
+*Sports — a dumbbell chart of women's-league average match attendance, 2019 vs 2024, showing double-digit growth across every league.*
 
-Pass a list of series as `y` and name them with `labels`; a legend appears
-automatically:
-
-```python
-sv.line(
-    ["Jan", "Feb", "Mar"],
-    [[10, 14, 13], [8, 9, 12]],
-    labels=["Product A", "Product B"],
-    ylabel="Sales",
-)
-```
-
-### Composing into subplots
-
-```python
-import matplotlib.pyplot as plt
-import simple_viz as sv
-
-fig, axes = plt.subplots(1, 2, figsize=(12, 4.5))
-sv.bar(["Q1", "Q2", "Q3", "Q4"], [12, 19, 15, 22], title="Quarterly", ax=axes[0])
-sv.line(["Jan", "Feb", "Mar"], [3, 5, 4], title="Trend", ax=axes[1])
-```
-
-## The palette
-
-`simple_viz.PALETTE` is a fixed list of eight hues, ordered so that adjacent
-colors stay distinguishable under common forms of color vision deficiency.
-Colors are assigned in order (series 0 → slot 0, series 1 → slot 1, …) and never
-cycled arbitrarily. Use `simple_viz.color(i)` to pull slot `i` yourself.
-
-If you have more than eight series, group the smallest into an "Other" category
-rather than relying on hue to distinguish nine-plus lines.
-
-## Theme
-
-The theme is applied on import via `simple_viz.use_theme()`. If another library
-overrides matplotlib's rcParams, call `use_theme()` again to restore it.
-
-## Examples & tests
-
-```bash
-python examples/demo.py    # renders one PNG per chart type into examples/output/
-python -m pytest           # run the test suite
-```
-
-### Worked visualizations
-
-Two longer, story-driven figures show the theme applied to real datasets — each
-a distinct topic and chart form. Both write a PNG into `examples/output/`.
-
-```bash
-python examples/maternal_health.py   # women's health — line + bar: global
-                                     # maternal-mortality decline and the
-                                     # regional gap (WHO/UN, illustrative)
-python examples/womens_sports.py     # sports — dumbbell chart: women's-league
-                                     # match attendance, 2019 vs 2024
-```
-
-Both use only the bundled palette, Poppins, and chrome plus plain matplotlib
-annotations — a template for building your own elevated charts on top of
-`simple_viz`.
+Regenerate them with `python examples/maternal_health.py` and
+`python examples/womens_sports.py`. Figures use rounded, illustrative public data.
 
 ## License
 
